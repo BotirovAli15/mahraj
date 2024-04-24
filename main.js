@@ -1,22 +1,64 @@
-function gcd(a, b) {
-    // Находим наибольший общий делитель с помощью алгоритма Евклида
-    while (b !== 0) {
-        let temp = b;
-        b = a % b;
-        a = temp;
+class MyFraction {
+    constructor(numerator, denominator) {
+        const gcd = MyFraction.gcd(numerator, denominator);
+        this.numerator = numerator / gcd;
+        this.denominator = denominator / gcd;
     }
-    return a;
+
+    static gcd(a, b) {
+        return b === 0 ? a : MyFraction.gcd(b, a % b);
+    }
+
+    add(other) {
+        const lcm = (this.denominator * other.denominator) / MyFraction.gcd(this.denominator, other.denominator);
+        const numerator = this.numerator * (lcm / this.denominator) + other.numerator * (lcm / other.denominator);
+        return new MyFraction(numerator, lcm);
+    }
+
+    subtract(other) {
+        const lcm = (this.denominator * other.denominator) / MyFraction.gcd(this.denominator, other.denominator);
+        const numerator = this.numerator * (lcm / this.denominator) - other.numerator * (lcm / other.denominator);
+        return new MyFraction(numerator, lcm);
+    }
+
+    multiply(other) {
+        return new MyFraction(this.numerator * other.numerator, this.denominator * other.denominator);
+    }
+
+    divide(other) {
+        return new MyFraction(this.numerator * other.denominator, this.denominator * other.numerator);
+    }
+
+    toString() {
+        return `${this.numerator}/${this.denominator}`;
+    }
 }
 
-function findLCM(a, b) {
-    // Находим наименьшее общее кратное с помощью формулы: НОК(a, b) = |a * b| / НОД(a, b)
-    return Math.abs(a * b) / gcd(a, b);
+function parseFraction(input) {
+    const [numerator, denominator] = input.split('/').map(Number);
+    if (isNaN(numerator) || isNaN(denominator) || denominator === 0) throw new Error('Invalid fraction format or values');
+    return new MyFraction(numerator, denominator);
 }
 
-// Запрашиваем у пользователя два числа
-let num1 = parseInt(prompt("Введите первое число:"));
-let num2 = parseInt(prompt("Введите второе число:"));
+function main() {
+    try {
+        const fractionA = parseFraction(prompt("Введите первую дробь (в формате a/b):"));
+        const fractionB = parseFraction(prompt("Введите вторую дробь (в формате a/b):"));
+        const operation = prompt("Введите операцию (+, -, *, /):");
 
-// Вычисляем и выводим результат
-let lcm = findLCM(num1, num2);
-alert(`Наименьшее общее кратное чисел ${num1} и ${num2} равно ${lcm}`);
+        let result;
+        switch (operation) {
+            case '+': result = fractionA.add(fractionB); break;
+            case '-': result = fractionA.subtract(fractionB); break;
+            case '*': result = fractionA.multiply(fractionB); break;
+            case '/': result = fractionA.divide(fractionB); break;
+            default: throw new Error('Invalid operation');
+        }
+
+        alert(`Результат: ${fractionA} ${operation} ${fractionB} = ${result}`);
+    } catch (error) {
+        alert(`Ошибка: ${error.message}`);
+    }
+}
+
+main();
